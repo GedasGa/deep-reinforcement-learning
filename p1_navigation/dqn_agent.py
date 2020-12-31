@@ -1,3 +1,4 @@
+from typing import Optional, List
 import numpy as np
 import random
 
@@ -21,7 +22,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 class Agent:
     """Interacts with and learns from the environment."""
 
-    def __init__(self, state_size, action_size, seed):
+    def __init__(self, state_size: int, action_size: int, seed: int, hidden_layers: Optional[List[int]] = [128, 64]):
         """Initialize an Agent object.
 
         Params
@@ -29,14 +30,15 @@ class Agent:
             state_size (int): dimension of each state
             action_size (int): dimension of each action
             seed (int): random seed
+            hidden_layers (Optional[List[int]]): List of hidden layers with number of nodes
         """
         self.state_size = state_size
         self.action_size = action_size
         self.seed = random.seed(seed)
 
         # Q-Network
-        self.qnetwork_local = QNetwork(state_size, action_size, seed).to(device)
-        self.qnetwork_target = QNetwork(state_size, action_size, seed).to(device)
+        self.qnetwork_local = QNetwork(state_size, action_size, seed, hidden_layers).to(device)
+        self.qnetwork_target = QNetwork(state_size, action_size, seed, hidden_layers).to(device)
         self.optimizer = optim.Adam(self.qnetwork_local.parameters(), lr=LR)
 
         # Replay memory
