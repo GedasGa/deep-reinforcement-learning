@@ -19,7 +19,7 @@ WEIGHT_DECAY = 0        # L2 weight decay
 MU = 0                  # Ornstein-Uhlenbeck noise MU parameter
 THETA = 0.15            # Ornstein-Uhlenbeck noise THETA parameter
 SIGMA = 0.2             # Ornstein-Uhlenbeck noise SIGMA parameter
-LEARN_NUM = 3           # number of learning passes from memory
+LEARN_PASSES = 3        # number of learning passes from memory
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -64,7 +64,7 @@ class Agent:
 
         # Learn at defined interval, if enough samples are available in memory
         if len(self.memory) > BATCH_SIZE:
-            for _ in range(LEARN_NUM):
+            for _ in range(LEARN_PASSES):
                 experiences = self.memory.sample()
                 self.learn(experiences, GAMMA)
 
