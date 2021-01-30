@@ -6,9 +6,7 @@ This report will describe the learning algorithm, model architecture for the neu
 
 ## Learning Algorithm
 
-I've used the 2nd version of the Unity environment that contains 20 identical agents, each with its own copy of the environment.
-
-The barrier for solving the second version of the environment is slightly different, because we need to take into account the presence of many agents. So here agents must get an average score of +30 (over 100 consecutive episodes, and over all agents).
+I've used the Tennis Unity environment with 2 identical agents playing tennis against one another. This environment is considered solved, when the average (over 100 episodes) of those **scores** is at least +0.5.
 
 ### Deep Deterministic Policy Gradient
 
