@@ -10,16 +10,17 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 BUFFER_SIZE = int(1e6)  # replay buffer size
-BATCH_SIZE = 128        # minibatch size
+BATCH_SIZE = 1024       # minibatch size
 GAMMA = 0.99            # discount factor
-TAU = 1e-3              # for soft update of target parameters
-LR_ACTOR = 1e-3         # learning rate of the actor
+TAU = 3e-3              # for soft update of target parameters
+LR_ACTOR = 1e-4         # learning rate of the actor
 LR_CRITIC = 1e-4        # learning rate of the critic
 WEIGHT_DECAY = 0        # L2 weight decay
 MU = 0                  # Ornstein-Uhlenbeck noise MU parameter
 THETA = 0.15            # Ornstein-Uhlenbeck noise THETA parameter
-SIGMA = 0.2             # Ornstein-Uhlenbeck noise SIGMA parameter
-LEARN_PASSES = 3        # number of learning passes from memory
+SIGMA = 0.05            # Ornstein-Uhlenbeck noise SIGMA parameter
+LEARN_EVERY = 1         # number how frequently learning process happens
+LEARN_PASSES = 1        # number of learning passes from memory
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -56,13 +57,14 @@ class Agent:
         # Replay memory
         self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)
 
-    def step(self, state, action, reward, next_state, done):
+    def step(self, states, actions, rewards, next_states, dones, t):
         """Save experience in replay memory, and use random sample from buffer to learn."""
         # Save experience / reward
-        self.memory.add(state, action, reward, next_state, done)
+        for state, action, reward, next_state, done in zip(states, actions, rewards, next_states, dones):
+            self.memory.add(state, action, reward, next_state, done)
 
         # Learn at defined interval, if enough samples are available in memory
-        if len(self.memory) > BATCH_SIZE:
+        if len(self.memory) > BATCH_SIZE and t % LEARN_EVERY == 0:
             for _ in range(LEARN_PASSES):
                 experiences = self.memory.sample()
                 self.learn(experiences, GAMMA)
@@ -107,6 +109,7 @@ class Agent:
         # Minimize the loss
         self.critic_optimizer.zero_grad()
         critic_loss.backward()
+        torch.nn.utils.clip_grad_norm_(self.critic_local.parameters(), 1)
         self.critic_optimizer.step()
 
         # ---------------------------- update actor ---------------------------- #
